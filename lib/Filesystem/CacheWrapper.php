@@ -27,11 +27,18 @@ declare(strict_types=1);
 namespace OCA\S3Scanner\Filesystem;
 
 use OC\Files\Cache\Wrapper\CacheWrapper as Wrapper;
+use OCA\S3Scanner\Helper;
 
 
 class CacheWrapper extends Wrapper {
 
 	public function correctFolderSize($path, $data = null, $isBackgroundScan = false) {
+		/** @var Helper $helper */
+		$helper = \OC::$server->get(Helper::class);
+		if ($helper->shouldPostpone($path)) {
+			return;
+		}
+
 		parent::correctFolderSize($path, $data, $isBackgroundScan);
 	}
 
