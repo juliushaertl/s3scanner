@@ -130,12 +130,14 @@ class Scanner {
 	}
 
 	public function getCacheQuery(ICache $cache, IUser $user, string $path = '', int $limit = 0, int $offset = 0): array {
-		$path = Filesystem::normalizePath('files/' . $path);
+		$path = Filesystem::normalizePath('files/' . $path . '/');
 		$basePath = $this->db->escapeLikeParameter(trim($path, '/')) . '/%';
 
 		$mimeTypeComparison = new SearchComparison(ISearchComparison::COMPARE_EQUAL, 'mimetype', 'httpd/unix-directory');
+		$pathExact = new SearchComparison(ISearchComparison::COMPARE_EQUAL, 'path', trim($path, '/'));
 		$pathLike = new SearchComparison(ISearchComparison::COMPARE_LIKE, 'path', $basePath);
-		$operator = new SearchBinaryOperator(ISearchBinaryOperator::OPERATOR_AND, [$mimeTypeComparison, $pathLike]);
+		$pathOr = new SearchBinaryOperator(ISearchBinaryOperator::OPERATOR_OR, [$pathExact, $pathLike]);
+		$operator = new SearchBinaryOperator(ISearchBinaryOperator::OPERATOR_AND, [$mimeTypeComparison, $pathOr]);
 
 		return $cache->searchQuery(new SearchQuery($operator, $limit, $offset, [
 			new SearchOrder(ISearchOrder::DIRECTION_DESCENDING, 'path'),
