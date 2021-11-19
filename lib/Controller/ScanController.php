@@ -50,13 +50,15 @@ class ScanController extends OCSController {
 
 	public function scan(string $userId, string $path = ''): DataResponse {
 		$counter = 0;
+		@ini_set('output_buffering', '0');
+		@header('X-Accel-Buffering: no');
 		try {
 			foreach ($this->scanner->scan($userId, $path) as $scan) {
 				// Sending empty characters in order to avoid load balancer timeouts
 				echo ' ';
 				$counter++;
-				ob_flush();
-				flush();
+				@ob_flush();
+				@flush();
 			}
 		} catch (\Throwable $e) {
 			\OC::$server->getLogger()->logException($e, [
