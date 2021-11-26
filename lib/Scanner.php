@@ -91,7 +91,7 @@ class Scanner {
 		}
 	}
 
-	public function scan(string $userId, string $path = '', int $limit = 0, int $offset = 0): Generator {
+	public function scan(string $userId, string $path = '', int $limit = 0, int $offset = 0, bool $propagateChanges = true): Generator {
 		$user = $this->userManager->get($userId);
 		if ($user === null) {
 			throw new NoUserException();
@@ -112,7 +112,7 @@ class Scanner {
 			$this->writeln('- corrected filesize');
 
 			// e.g. /a/b/c/1 and /a/b/c/2 will both trigger the etag update on /a/b/c
-			if (isset($etagTriggered[$internalPath])) {
+			if (isset($etagTriggered[$internalPath]) || !$propagateChanges) {
 				$this->writeln('- skipped propagation');
 			} else {
 				// We need to propagate an etag update for the found folder as well, therefore we add an extra fake filename to the path

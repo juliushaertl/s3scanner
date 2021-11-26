@@ -44,16 +44,16 @@ class ScanController extends OCSController {
 		$this->scanner = $scanner;
 	}
 
-	public function scanAll(string $userId): DataResponse {
-		return $this->scan($userId);
+	public function scanAll(string $userId, bool $propagateChanges = true): DataResponse {
+		return $this->scan($userId, '', $propagateChanges);
 	}
 
-	public function scan(string $userId, string $path = ''): DataResponse {
+	public function scan(string $userId, string $path = '', bool $propagateChanges = true): DataResponse {
 		$counter = 0;
 		@ini_set('output_buffering', '0');
 		@header('X-Accel-Buffering: no');
 		try {
-			foreach ($this->scanner->scan($userId, $path) as $scan) {
+			foreach ($this->scanner->scan($userId, $path, 0, 0, $propagateChanges) as $scan) {
 				// Sending empty characters in order to avoid load balancer timeouts
 				echo ' ';
 				$counter++;
