@@ -5,7 +5,7 @@
 	<name>S3 Scanner</name>
 	<summary>Scan object store after upload</summary>
 	<description>Helper app to scan after uploads that may not have the correct propagation/size information</description>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<licence>agpl</licence>
 	<author>Julius Härtl</author>
 	<author>Morris Jobke</author>
