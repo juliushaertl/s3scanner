@@ -33,15 +33,17 @@ use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCSController;
 use OCP\IRequest;
+use Psr\Log\LoggerInterface;
 
 class ScanController extends OCSController {
 
 	/** @var Scanner */
 	private $scanner;
 
-	public function __construct($appName, IRequest $request, Scanner $scanner) {
+	public function __construct($appName, IRequest $request, Scanner $scanner, LoggerInterface $logger) {
 		parent::__construct($appName, $request);
 		$this->scanner = $scanner;
+		$this->logger = $logger;
 	}
 
 	public function scanAll(string $userId, bool $propagateChanges = true): DataResponse {
@@ -49,11 +51,14 @@ class ScanController extends OCSController {
 	}
 
 	public function scan(string $userId, string $path = '', bool $propagateChanges = true): DataResponse {
+		$this->logger->debug('Start scanning for ' . $userId . ' with path: ' . $path);
 		$counter = 0;
 		@ini_set('output_buffering', '0');
 		@header('X-Accel-Buffering: no');
+		@ob_start();
 		try {
 			foreach ($this->scanner->scan($userId, $path, 0, 0, $propagateChanges) as $scan) {
+				$this->logger->debug('Scanned path ' . $scan . ' for ' . $userId);
 				// Sending empty characters in order to avoid load balancer timeouts
 				echo ' ';
 				$counter++;
@@ -70,6 +75,7 @@ class ScanController extends OCSController {
 				'processed' => $counter
 			]);
 		}
+		$this->logger->debug('Finished scanning for ' . $userId . ' with path: ' . $path);
 		return new DataResponse([
 			'status' => 'success',
 			'processed' => $counter

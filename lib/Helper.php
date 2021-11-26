@@ -28,26 +28,33 @@ namespace OCA\S3Scanner;
 
 
 use OCP\IRequest;
+use Psr\Log\LoggerInterface;
 
 class Helper {
 
 	/** @var IRequest */
 	private $request;
+	/** @var LoggerInterface */
+	private $logger;
 
-	public function __construct(IRequest $request) {
+	public function __construct(IRequest $request, LoggerInterface $logger) {
 		$this->request = $request;
+		$this->logger = $logger;
 	}
 
 	public function shouldPostpone(string $path): bool {
 		if (strpos($path, 'uploads/') === 0 && basename($path) === '.target') {
+			$this->logger->debug('Postponing for ' . $path);
 			return true;
 		}
 
 		if ($this->request->getHeader('X-Chunking-Destination') !== "" && $path === 'uploads') {
+			$this->logger->debug('Postponing for ' . $path);
 			return true;
 		}
 
 		if ($this->request->getHeader('X-Postpone-Propagation') === "true") {
+			$this->logger->debug('Postponing for ' . $path);
 			return true;
 		}
 
